@@ -36,12 +36,25 @@ public class UserService {
     public UserResponse create(@Valid RegisterRequest registerRequest) {
 
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Email is already exists.");
+            User existingUser = userRepository.findByEmail(registerRequest.getEmail());
+
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(existingUser.getId());
+            userResponse.setKeycloakId(existingUser.getKeycloakId());
+            userResponse.setPassword(existingUser.getPassword());
+            userResponse.setEmail(existingUser.getEmail());
+            userResponse.setFirstName(existingUser.getFirstName());
+            userResponse.setLastName(existingUser.getLastName());
+            userResponse.setCreatedAt(existingUser.getCreatedAt());
+            userResponse.setUpdatedAt(existingUser.getUpdatedAt());
+
+            return userResponse;
         }
 
         User user = new User();
         user.setEmail(registerRequest.getEmail());
         user.setPassword(registerRequest.getPassword());
+        user.setKeycloakId(registerRequest.getKeycloakId());
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
 
@@ -49,6 +62,7 @@ public class UserService {
 
         UserResponse userResponse = new UserResponse();
         userResponse.setId(savedUser.getId());
+        userResponse.setKeycloakId(savedUser.getKeycloakId());
         userResponse.setPassword(savedUser.getPassword());
         userResponse.setEmail(savedUser.getEmail());
         userResponse.setFirstName(savedUser.getFirstName());
@@ -59,8 +73,8 @@ public class UserService {
         return userResponse;
     }
 
-    public Boolean existByUserId(String userId) {
+    public Boolean existsByKeycloakId(String userId) {
         log.info("Calling user validation API : {}", userId);
-        return userRepository.existsById(userId);
+        return userRepository.existsByKeycloakId(userId);
     }
 }
